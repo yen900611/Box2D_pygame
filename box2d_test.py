@@ -28,22 +28,9 @@ clock = pygame.time.Clock()
 
 world = world(gravity=(0, 0), doSleep=True, CollideConnected=False)
 
-body1 = world.CreateDynamicBody(position=(14, 18), angle=0, linearVelocity=(0, 0))
-# circle = body1.CreateCircleFixture(radius=1, density=1, friction=0.1, restitution = 0.3)
-box = body1.CreatePolygonFixture(box=(1, 3), density=1, friction=0.3, restitution=0.3)
-
-body2 = world.CreateDynamicBody(position=(20, 18), angle=0, linearVelocity=(0, 0))
-# circle = body2.CreateCircleFixture(radius=1, density=1, friction=0.1, restitution = 0.3)
-box = body2.CreatePolygonFixture(box=(1, 3), density=1, friction=0.1, restitution=0.3)
-
-right_wheel_velocity = 0
-left_wheel_velocity = 0
-
 dynamic_body = world.CreateDynamicBody(position=(17, 18))
-box = dynamic_body.CreatePolygonFixture(box=(2, 2), density=1, friction=0.1, restitution=0.3)
+box = dynamic_body.CreatePolygonFixture(box=(2, 2.5), density=1, friction=0.1, restitution=0.3)
 
-joint = world.CreateJoint(bodyA=dynamic_body, bodyB=body1, collideConnected=True, type=b2WheelJoint)
-joint = world.CreateJoint(bodyA=dynamic_body, bodyB=body2, collideConnected=True, type=b2WheelJoint)
 
 colors = {
     kinematicBody: (255, 255, 255, 255),
@@ -91,29 +78,24 @@ while running:
             # The user closed the window or pressed escape
             running = False
         if (event.type == KEYDOWN and event.key == K_UP):
-            right_wheel_velocity = 10
-            left_wheel_velocity = 10
+            f = dynamic_body.GetWorldVector(localVector=(0.0, 200.0))
+            p = dynamic_body.GetWorldPoint(localPoint=(0.0, 2.0))
+            dynamic_body.ApplyForce(f, p, True)
 
         if (event.type == KEYDOWN and event.key == K_DOWN):
-            right_wheel_velocity = -10
-            left_wheel_velocity = -10
-
+            pass
         if (event.type == KEYDOWN and event.key == K_LEFT):
-            right_wheel_velocity = 10
-            left_wheel_velocity = 5
+            dynamic_body.ApplyTorque(50.0, True)
             pass
 
         if (event.type == KEYDOWN and event.key == K_RIGHT):
-            right_wheel_velocity = 5
-            left_wheel_velocity = 10
+            dynamic_body.ApplyTorque(-50.0, True)
             pass
 
         #
         # if (event.type == KEYDOWN and event.key == K_s):
         #     left_wheel_velocity = -10
 
-    body2.linearVelocity = (math.sin(dynamic_body.angle) * right_wheel_velocity, math.cos(dynamic_body.angle) * right_wheel_velocity)
-    body1.linearVelocity = (math.sin(dynamic_body.angle) * left_wheel_velocity, math.cos(dynamic_body.angle) * left_wheel_velocity)
 
     screen.fill((0, 0, 0, 0))
     # Draw the world
@@ -126,7 +108,7 @@ while running:
     world.Step(TIME_STEP, 10, 10)
     world.ClearForces()
 
-    car = pygame.transform.rotate(car_origin,angle%360)
+    car = pygame.transform.rotate(car_origin,angle%360 + 90)
     angle = dynamic_body.angle*180/math.pi
     screen.blit(car,((dynamic_body.position[0]-2)*20, (24-dynamic_body.position[1]-2)*20))
 
