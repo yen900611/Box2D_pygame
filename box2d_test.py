@@ -25,12 +25,27 @@ clock = pygame.time.Clock()
 
 # --- pybox2d world setup ---
 # Create the world
+gravity = 1
 
 world = world(gravity=(0, 0), doSleep=True, CollideConnected=False)
 
-dynamic_body = world.CreateDynamicBody(position=(17, 18))
-box = dynamic_body.CreatePolygonFixture(box=(2, 2.5), density=1, friction=0.1, restitution=0.3)
+ground = world.CreateBody(position=(0, 20))
 
+dynamic_body = world.CreateDynamicBody(position=(17, 18))
+box = dynamic_body.CreatePolygonFixture(box=(1, 1.5), density=2, friction=0.1, restitution=0.3)
+
+r = math.sqrt(2.0 * dynamic_body.inertia / dynamic_body.mass)
+
+'''模擬摩擦力'''
+world.CreateFrictionJoint(
+    bodyA=ground,
+    bodyB=dynamic_body,
+    localAnchorA=(0, 0),
+    localAnchorB=(0, 0),
+    collideConnected=True,
+    maxForce=dynamic_body.mass * gravity,
+    maxTorque=dynamic_body.mass * r * gravity
+)
 
 colors = {
     kinematicBody: (255, 255, 255, 255),
@@ -71,7 +86,8 @@ angle = dynamic_body.angle*180/math.pi
 
 running = True
 while running:
-
+    print("WorldPoint " + str(dynamic_body.GetWorldPoint(localPoint=(0.0, 2.0))))
+    print("position " + str(dynamic_body.position))
     # Check the event queue
     for event in pygame.event.get():
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
@@ -83,18 +99,24 @@ while running:
             dynamic_body.ApplyForce(f, p, True)
 
         if (event.type == KEYDOWN and event.key == K_DOWN):
+            f = dynamic_body.GetWorldVector(localVector=(0.0, -200.0))
+            p = dynamic_body.GetWorldPoint(localPoint=(0.0, 2.0))
+
+            dynamic_body.ApplyForce(f, p, True)
             pass
         if (event.type == KEYDOWN and event.key == K_LEFT):
-            dynamic_body.ApplyTorque(50.0, True)
+            dynamic_body.ApplyTorque(100.0, True)
             pass
 
         if (event.type == KEYDOWN and event.key == K_RIGHT):
-            dynamic_body.ApplyTorque(-50.0, True)
+            dynamic_body.ApplyTorque(-100.0, True)
             pass
 
-        #
-        # if (event.type == KEYDOWN and event.key == K_s):
-        #     left_wheel_velocity = -10
+        if (event.type == KEYDOWN and event.key == K_s):
+            PPM += 1
+
+        if (event.type == KEYDOWN and event.key == K_w):
+            PPM -= 1
 
 
     screen.fill((0, 0, 0, 0))
@@ -110,7 +132,7 @@ while running:
 
     car = pygame.transform.rotate(car_origin,angle%360 + 90)
     angle = dynamic_body.angle*180/math.pi
-    screen.blit(car,((dynamic_body.position[0]-2)*20, (24-dynamic_body.position[1]-2)*20))
+    # screen.blit(car,((dynamic_body.position[0]-2)*20, (24-dynamic_body.position[1]-2)*20))
 
 
     # Flip the screen and try to keep at the target FPS

@@ -23,38 +23,39 @@ world = b2.world(gravity=(0, 0), doSleep=True)
 
 # --- setup mazz ---
 
-well = world.CreateKinematicBody(position = (12,0.5),linearVelocity = (0,0))
-box = well.CreatePolygonFixture(box = (12,0.5))
+def createMaze():
+    well = world.CreateKinematicBody(position = (12,0.5),linearVelocity = (0,0))
+    box = well.CreatePolygonFixture(box = (12,0.5))
 
-well = world.CreateKinematicBody(position = (12,23.5),linearVelocity = (0,0))
-box = well.CreatePolygonFixture(box = (12,0.5))
+    well = world.CreateKinematicBody(position = (12,23.5),linearVelocity = (0,0))
+    box = well.CreatePolygonFixture(box = (12,0.5))
 
-well = world.CreateKinematicBody(position = (0.5,12),linearVelocity = (0,0))
-box = well.CreatePolygonFixture(box = (0.5,11))
+    well = world.CreateKinematicBody(position = (0.5,12),linearVelocity = (0,0))
+    box = well.CreatePolygonFixture(box = (0.5,11))
 
-well = world.CreateKinematicBody(position = (23.5,12),linearVelocity = (0,0))
-box = well.CreatePolygonFixture(box = (0.5,11))
+    well = world.CreateKinematicBody(position = (23.5,12),linearVelocity = (0,0))
+    box = well.CreatePolygonFixture(box = (0.5,11))
 
-well = world.CreateKinematicBody(position = (17.5,9.25),linearVelocity = (0,0))
-box = well.CreatePolygonFixture(box = (0.5,8.25))
+    well = world.CreateKinematicBody(position = (17.5,9.25),linearVelocity = (0,0))
+    box = well.CreatePolygonFixture(box = (0.5,8.25))
 
-well = world.CreateKinematicBody(position = (6.5,9),linearVelocity = (0,0))
-box = well.CreatePolygonFixture(box = (0.5,3))
+    well = world.CreateKinematicBody(position = (6.5,9),linearVelocity = (0,0))
+    box = well.CreatePolygonFixture(box = (0.5,3))
 
-well = world.CreateKinematicBody(position = (12,15.25),linearVelocity = (0,0))
-box = well.CreatePolygonFixture(box = (0.5,2.75))
+    well = world.CreateKinematicBody(position = (12,15.25),linearVelocity = (0,0))
+    box = well.CreatePolygonFixture(box = (0.5,2.75))
 
-well = world.CreateKinematicBody(position = (12,3.75),linearVelocity = (0,0))
-box = well.CreatePolygonFixture(box = (0.5,3))
+    well = world.CreateKinematicBody(position = (12,3.75),linearVelocity = (0,0))
+    box = well.CreatePolygonFixture(box = (0.5,3))
 
-well = world.CreateKinematicBody(position = (6.5,17.5),linearVelocity = (0,0))
-box = well.CreatePolygonFixture(box = (5.5,0.5))
+    well = world.CreateKinematicBody(position = (6.5,17.5),linearVelocity = (0,0))
+    box = well.CreatePolygonFixture(box = (5.5,0.5))
 
-well = world.CreateKinematicBody(position = (3.75,6.5),linearVelocity = (0,0))
-box = well.CreatePolygonFixture(box = (2.75,0.5))
+    well = world.CreateKinematicBody(position = (3.75,6.5),linearVelocity = (0,0))
+    box = well.CreatePolygonFixture(box = (2.75,0.5))
 
-var_well = world.CreateKinematicBody(position = (42,16),linearVelocity = (-2,0))
-var_well.CreatePolygonFixture(box = (2,0.5))
+# var_well = world.CreateKinematicBody(position = (42,16),linearVelocity = (-2,0))
+# var_well.CreatePolygonFixture(box = (2,0.5))
 
 # --- setup car ---
 car_image = pygame.transform.scale(pygame.image.load("car2.png"),(96,60))
@@ -94,6 +95,7 @@ def my_draw_circle(circle, body, fixture):
 b2.circleShape.draw = my_draw_circle
 right_force = 0
 left_force = 0
+createMaze()
 # --- main game loop ---
 running = True
 while running:
@@ -118,6 +120,7 @@ while running:
         if (event.type == KEYDOWN and event.key == K_s):
             left_force = -10
             # left_wheel.ApplyForce(force=(0,-10), point=(left_wheel.position[0],left_wheel.position[1]), wake=True)
+
     right_force_y = right_force * cos(car.angle)
     right_force_x = right_force * sin(car.angle)
     # print(right_force_x,right_force_y,car.angle)
