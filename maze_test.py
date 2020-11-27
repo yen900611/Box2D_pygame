@@ -24,35 +24,35 @@ world = b2.world(gravity=(0, 0), doSleep=True)
 # --- setup mazz ---
 
 def createMaze():
-    well = world.CreateKinematicBody(position = (12,0.5),linearVelocity = (0,0))
-    box = well.CreatePolygonFixture(box = (12,0.5))
+    wall = world.CreateKinematicBody(position = (12, 0.5), linearVelocity = (0, 0))
+    box = wall.CreatePolygonFixture(box = (12, 0.5))
 
-    well = world.CreateKinematicBody(position = (12,23.5),linearVelocity = (0,0))
-    box = well.CreatePolygonFixture(box = (12,0.5))
+    wall = world.CreateKinematicBody(position = (12, 23.5), linearVelocity = (0, 0))
+    box = wall.CreatePolygonFixture(box = (12, 0.5))
 
-    well = world.CreateKinematicBody(position = (0.5,12),linearVelocity = (0,0))
-    box = well.CreatePolygonFixture(box = (0.5,11))
+    wall = world.CreateKinematicBody(position = (0.5, 12), linearVelocity = (0, 0))
+    box = wall.CreatePolygonFixture(box = (0.5, 11))
 
-    well = world.CreateKinematicBody(position = (23.5,12),linearVelocity = (0,0))
-    box = well.CreatePolygonFixture(box = (0.5,11))
+    wall = world.CreateKinematicBody(position = (23.5, 12), linearVelocity = (0, 0))
+    box = wall.CreatePolygonFixture(box = (0.5, 11))
 
-    well = world.CreateKinematicBody(position = (17.5,9.25),linearVelocity = (0,0))
-    box = well.CreatePolygonFixture(box = (0.5,8.25))
+    wall = world.CreateKinematicBody(position = (17.5, 9.25), linearVelocity = (0, 0))
+    box = wall.CreatePolygonFixture(box = (0.5, 8.25))
 
-    well = world.CreateKinematicBody(position = (6.5,9),linearVelocity = (0,0))
-    box = well.CreatePolygonFixture(box = (0.5,3))
+    wall = world.CreateKinematicBody(position = (6.5, 9), linearVelocity = (0, 0))
+    box = wall.CreatePolygonFixture(box = (0.5, 3))
 
-    well = world.CreateKinematicBody(position = (12,15.25),linearVelocity = (0,0))
-    box = well.CreatePolygonFixture(box = (0.5,2.75))
+    wall = world.CreateKinematicBody(position = (12, 15.25), linearVelocity = (0, 0))
+    box = wall.CreatePolygonFixture(box = (0.5, 2.75))
 
-    well = world.CreateKinematicBody(position = (12,3.75),linearVelocity = (0,0))
-    box = well.CreatePolygonFixture(box = (0.5,3))
+    wall = world.CreateKinematicBody(position = (12, 3.75), linearVelocity = (0, 0))
+    box = wall.CreatePolygonFixture(box = (0.5, 3))
 
-    well = world.CreateKinematicBody(position = (6.5,17.5),linearVelocity = (0,0))
-    box = well.CreatePolygonFixture(box = (5.5,0.5))
+    wall = world.CreateKinematicBody(position = (6.5, 17.5), linearVelocity = (0, 0))
+    box = wall.CreatePolygonFixture(box = (5.5, 0.5))
 
-    well = world.CreateKinematicBody(position = (3.75,6.5),linearVelocity = (0,0))
-    box = well.CreatePolygonFixture(box = (2.75,0.5))
+    wall = world.CreateKinematicBody(position = (3.75, 6.5), linearVelocity = (0, 0))
+    box = wall.CreatePolygonFixture(box = (2.75, 0.5))
 
 # var_well = world.CreateKinematicBody(position = (42,16),linearVelocity = (-2,0))
 # var_well.CreatePolygonFixture(box = (2,0.5))
