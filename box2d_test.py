@@ -62,6 +62,7 @@ colors = {
 
 def my_draw_polygon(polygon, body, fixture):
     vertices = [(body.transform * v) * PPM for v in polygon.vertices]
+    print(vertices)
     vertices = [(v[0], SCREEN_HEIGHT - v[1]) for v in vertices]
     pygame.draw.polygon(screen, colors[body.type], vertices)
 
@@ -90,11 +91,6 @@ angle = dynamic_body.angle*180/math.pi
 
 running = True
 while running:
-    # print("worldVector " + str(dynamic_body.GetWorldVector(localVector = (0, 10))))
-    # print("WorldPoint " + str(dynamic_body.GetWorldPoint(localPoint=(0.0, 0.0))))
-    # print("position " + str(dynamic_body.position))
-    # TODO
-    b2Distance()
     # Check the event queue
     for event in pygame.event.get():
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):

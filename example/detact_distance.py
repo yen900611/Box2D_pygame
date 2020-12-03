@@ -85,7 +85,6 @@ def my_draw_polygon(polygon, body, fixture):
     vertices = [(v[0], SCREEN_HEIGHT - v[1]) for v in vertices]
     pygame.draw.polygon(screen, colors[body.type], vertices)
 
-
 polygonShape.draw = my_draw_polygon
 
 
@@ -97,28 +96,17 @@ def my_draw_circle(circle, body, fixture):
     # Note: Python 3.x will enforce that pygame get the integers it requests,
     #       and it will not convert from float.
 
-
-# transform1 = b2Transform()
-
 circleShape.draw = my_draw_circle
 
-# load image
-car_origin = pygame.transform.scale(pygame.image.load("car2.png"),(80,80))
-
-angle = dynamic_body.angle*180/math.pi
 
 # --- main game loop ---
 
 running = True
 while running:
-    # print("worldVector " + str(dynamic_body.GetWorldVector(localVector = (0, 10))))
-    # print("WorldPoint " + str(dynamic_body.GetWorldPoint(localPoint=(0.0, 0.0))))
-    # print("position " + str(dynamic_body.position))
-    # TODO Distance
+    # detact distance by using b2Distance
     right_distance = b2Distance(shapeA=ball.shape, shapeB=box.shape, transformA=sensor_right.transform, transformB=wall_right.transform)
-    # print("origin data " + str(right_distance.distance))
-    # print("count data " + str(right_distance.distance * math.cos(dynamic_body.angle)))
-    # print(dynamic_body.angle)
+    print("origin data " + str(right_distance.distance))
+    print("count data " + str(right_distance.distance / math.cos(dynamic_body.angle % (math.pi * 2))))
     # Check the event queue
     for event in pygame.event.get():
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
@@ -126,8 +114,7 @@ while running:
             running = False
         if (event.type == KEYDOWN and event.key == K_UP):
             f = dynamic_body.GetWorldVector(localVector=(0.0, 200.0))
-            # p = dynamic_body.GetWorldPoint(localPoint=(0.0, 2.0))
-            p = dynamic_body.position
+            p = dynamic_body.GetWorldPoint(localPoint=(0.0, 2.0))
             dynamic_body.ApplyForce(f, p, True)
 
         if (event.type == KEYDOWN and event.key == K_DOWN):
@@ -162,7 +149,7 @@ while running:
     world.Step(TIME_STEP, 10, 10)
     world.ClearForces()
 
-    car = pygame.transform.rotate(car_origin,angle%360 + 90)
+    # car = pygame.transform.rotate(car_origin,angle%360 + 90)
     angle = dynamic_body.angle*180/math.pi
     # screen.blit(car,((dynamic_body.position[0]-2)*20, (24-dynamic_body.position[1]-2)*20))
 
