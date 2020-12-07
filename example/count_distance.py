@@ -16,7 +16,7 @@ from Box2D.b2 import *
 PPM = 20.0  # pixels per meter
 TARGET_FPS = 60
 TIME_STEP = 1.0 / TARGET_FPS
-SCREEN_WIDTH, SCREEN_HEIGHT = 900, 480
+SCREEN_WIDTH, SCREEN_HEIGHT = 800, 480
 
 # --- pygame setup ---
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
@@ -56,7 +56,7 @@ ball = sensor_right.CreateCircleFixture(radius = 0.2)
 world.CreateDistanceJoint(bodyA=sensor_left,bodyB=dynamic_body,collideConnected=True)
 world.CreateDistanceJoint(bodyA=sensor_right,bodyB=dynamic_body,collideConnected=True)
 
-def cross_point(x1, y1, vx1, vy1, x2, y2, vx2, vy2, ):
+def cross_point(dot1, vec1, dot2, vec2 ):
     '''
     define line A and line B, write a function which can return the point two lines cross.
     dot_1 = (x1, y1)
@@ -65,6 +65,14 @@ def cross_point(x1, y1, vx1, vy1, x2, y2, vx2, vy2, ):
     vec_2 = (vx2, vy2)
     line1 = [(x1, y1), (x1 + vx1, y1 + vy1)], line2 = [(x2, y2), (x2 + vx2, y2 + vy2)]
     '''
+    x1 = dot1[0]
+    y1 = dot1[1]
+    x2 = dot2[0]
+    y2 = dot2[1]
+    vx1 = vec1[0]
+    vy1 = vec1[1]
+    vx2 = vec2[0]
+    vy2 = vec2[1]
     if vx1 == 0:  # 如果斜率為0
         k1 = None
         b1 = 0
@@ -90,12 +98,16 @@ def cross_point(x1, y1, vx1, vy1, x2, y2, vx2, vy2, ):
         x = (b2 - b1) * 1.0 / (k1 - k2)
     y = k1 * x * 1.0 + b1 * 1.0
     return (x, y)
-def cross_point_dot(x1, y1, vx1, vy1, x2, y2, x3, y3, ):
+def cross_point_dot(dot1, vec1, dot2, dot3 ):
     '''
     this function is same as above. But in this case, one of lines has starting point and ending point.
     If the point two line cross out of the line, function should return None.
     '''
-    p = cross_point(x1, y1, vx1, vy1, x2, y2, x3 - x2, y3-y2)
+    x2 = dot2[0]
+    y2 = dot2[1]
+    x3 = dot3[0]
+    y3 = dot3[1]
+    p = cross_point(dot1, vec1, dot2, (x3-x2, y3-y2))
     if p:
         if x2 <= p[0] <= x3 or x3 <= p[0] <= x2:
             if y2 <= p[1] <= y3 or y3 <= p[1] <= y2:
@@ -118,6 +130,9 @@ def create_wall():
     wall_right = world.CreateKinematicBody(position=(23.5, 12), linearVelocity=(0, 0))
     box = wall_right.CreatePolygonFixture(box=(0.5, 11))
 
+    # wall = world.CreateKinematicBody(position=(18, 9.5), linearVelocity=(0, 0))
+    # box = wall.CreatePolygonFixture(box=(0.5, 11.5))
+
 create_wall()
 
 wall_info = [
@@ -129,21 +144,62 @@ colors = {
     staticBody: (255, 255, 255, 255),
     dynamicBody: (127, 127, 127, 255),
 }
+def front_sensor_detect(walls):
+    distance = []
+    result = None
+    vector = None
+    if sensor_left.position[0] == sensor_right.position[0]:
+        vector = (1, 0)
+    elif sensor_left.position[1] == sensor_right.position[1]:
+        vector = (0, 1)
+    else:
+        vector = (sensor_left.position[1]-sensor_right.position[1], sensor_right.position[0] - sensor_left.position[0])
+
+    for wall in walls:
+        distance.append(cross_point_dot(dynamic_body.position,
+                        vector,
+                        wall[0], wall[1])
+                        )
+    for i in distance:
+        if i:
+            if i[0] - dynamic_body.position[0] > 0 and vector[0] >0:
+                result = math.sqrt((i[0] - dynamic_body.position[0]) ** 2 + (i[1] - dynamic_body.position[1]) ** 2) - 1.5
+                pygame.draw.line(screen, (255,255,0), (dynamic_body.position[0] *PPM,SCREEN_HEIGHT-dynamic_body.position[1]*PPM),
+                                     (i[0]*PPM, SCREEN_HEIGHT-i[1]*PPM), 5)
+            elif i[0] - dynamic_body.position[0] < 0 and vector[0] < 0:
+                result = math.sqrt((i[0] - dynamic_body.position[0]) ** 2 + (i[1] - dynamic_body.position[1]) ** 2) - 1.5
+                pygame.draw.line(screen, (255,255,0), (dynamic_body.position[0] *PPM,SCREEN_HEIGHT-dynamic_body.position[1]*PPM),
+                                     (i[0]*PPM, SCREEN_HEIGHT-i[1]*PPM), 5)
+            else:
+                pass
+        else:
+            pass
+
+    try:
+        return round(result, 3)
+    except TypeError:
+        return result
 
 def right_sensor_detect(walls):
     distance = []
     result = None
     for wall in walls:
-        distance.append(cross_point_dot(sensor_right.position[0], sensor_right.position[1],
-                        sensor_left.position[0]-sensor_right.position[0], sensor_left.position[1]-sensor_right.position[1],
-                        wall[0][0], wall[0][1], wall[1][0],wall[1][1])
+        distance.append(cross_point_dot(sensor_right.position,
+                        sensor_left.position-sensor_right.position,
+                        wall[0], wall[1])
                         )
     for i in distance:
         if i:
             if sensor_left.position[0] > sensor_right.position[0] >= i[0]:
                 result = math.sqrt((i[0]-sensor_right.position[0])**2 + (i[1]-sensor_right.position[1])**2)
+                pygame.draw.line(screen, (255,0,255), (sensor_right.position[0] *PPM,SCREEN_HEIGHT-sensor_right.position[1]*PPM),
+                                 (i[0]*PPM, SCREEN_HEIGHT-i[1]*PPM), 5)
             elif i[0] >= sensor_right.position[0] >sensor_left.position[0]:
                 result = math.sqrt((i[0]-sensor_right.position[0])**2 + (i[1]-sensor_right.position[1])**2)
+                pygame.draw.line(screen, (255, 0, 255),
+                                 (sensor_right.position[0] * PPM, SCREEN_HEIGHT - sensor_right.position[1] * PPM),
+                                 (i[0] * PPM,SCREEN_HEIGHT- i[1] * PPM), 5)
+
             else:
                 pass
 
@@ -156,16 +212,22 @@ def left_sensor_detect(walls):
     distance = []
     result = None
     for wall in walls:
-        distance.append(cross_point_dot(sensor_left.position[0], sensor_left.position[1],
-                        sensor_right.position[0]-sensor_left.position[0], sensor_right.position[1]-sensor_left.position[1],
-                        wall[0][0], wall[0][1], wall[1][0],wall[1][1])
+        distance.append(cross_point_dot(sensor_left.position,
+                        sensor_right.position - sensor_left.position,
+                        wall[0], wall[1])
                         )
     for i in distance:
         if i:
             if sensor_right.position[0] > sensor_left.position[0] >= i[0]:
                 result = math.sqrt((i[0]-sensor_left.position[0])**2 + (i[1]-sensor_left.position[1])**2)
+                pygame.draw.line(screen, (0, 255, 255),
+                                 (sensor_left.position[0] * PPM, SCREEN_HEIGHT - sensor_left.position[1] * PPM),
+                                 (i[0] * PPM, SCREEN_HEIGHT- i[1] * PPM), 5)
             elif i[0] >= sensor_left.position[0] >sensor_right.position[0]:
                 result = math.sqrt((i[0]-sensor_left.position[0])**2 + (i[1]-sensor_left.position[1])**2)
+                pygame.draw.line(screen, (0, 255, 255),
+                                 (sensor_left.position[0] * PPM, SCREEN_HEIGHT - sensor_left.position[1] * PPM),
+                                 (i[0] * PPM, SCREEN_HEIGHT - i[1] * PPM), 5)
             else:
                 pass
     try:
@@ -173,9 +235,7 @@ def left_sensor_detect(walls):
     except TypeError:
         return result
 
-
 # Let's play with extending the shape classes to draw for us.
-
 
 def my_draw_polygon(polygon, body, fixture):
     vertices = [(body.transform * v) * PPM for v in polygon.vertices]
@@ -183,7 +243,6 @@ def my_draw_polygon(polygon, body, fixture):
     pygame.draw.polygon(screen, colors[body.type], vertices)
 
 polygonShape.draw = my_draw_polygon
-
 
 def my_draw_circle(circle, body, fixture):
     position = body.transform * circle.pos * PPM
@@ -201,8 +260,9 @@ circleShape.draw = my_draw_circle
 running = True
 while running:
     screen.fill((0, 0, 0, 0))
-    print("left sensor:" + str(left_sensor_detect(wall_info)))
-    print("right sensor:" + str(right_sensor_detect(wall_info)))
+    print(front_sensor_detect(wall_info))
+    left_sensor_detect(wall_info)
+    right_sensor_detect(wall_info)
 
     # detact distance by using b2Distance
     # Check the event queue
@@ -212,13 +272,12 @@ while running:
             running = False
         if (event.type == KEYDOWN and event.key == K_UP):
             f = dynamic_body.GetWorldVector(localVector=(0.0, 200.0))
-            # p = dynamic_body.GetWorldPoint(localPoint=(0.0, 2.0))
-            p = dynamic_body.position
+            p = dynamic_body.GetWorldPoint(localPoint=(0.0, -2.0))
             dynamic_body.ApplyForce(f, p, True)
 
         if (event.type == KEYDOWN and event.key == K_DOWN):
             f = dynamic_body.GetWorldVector(localVector=(0.0, -200.0))
-            p = dynamic_body.GetWorldPoint(localPoint=(0.0, 2.0))
+            p = dynamic_body.GetWorldPoint(localPoint=(0.0, -2.0))
             dynamic_body.ApplyForce(f, p, True)
             pass
 
@@ -248,7 +307,6 @@ while running:
     world.Step(TIME_STEP, 10, 10)
 
     # screen.blit(car,((dynamic_body.position[0]-2)*20, (24-dynamic_body.position[1]-2)*20))
-
 
     # Flip the screen and try to keep at the target FPS
     pygame.display.flip()
