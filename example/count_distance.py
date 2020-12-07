@@ -32,7 +32,7 @@ world = world(gravity=(0, 0), doSleep=True, CollideConnected=False)
 
 ground = world.CreateBody(position=(0, 20))
 
-dynamic_body = world.CreateDynamicBody(position=(17, 18))
+dynamic_body = world.CreateDynamicBody(position=(21, 3))
 box1 = dynamic_body.CreatePolygonFixture(box=(1, 1.5), density=2, friction=0.1, restitution=0.3)
 
 r = math.sqrt(0.2 * dynamic_body.inertia / dynamic_body.mass)
@@ -47,10 +47,10 @@ world.CreateFrictionJoint(
     maxTorque=dynamic_body.mass * r * gravity
 )
 
-sensor_left = world.CreateDynamicBody(position = (15.8, 18))
+sensor_left = world.CreateDynamicBody(position = (19.8, 3))
 ball = sensor_left.CreateCircleFixture(radius = 0.2)
 
-sensor_right = world.CreateDynamicBody(position = (18.2, 18))
+sensor_right = world.CreateDynamicBody(position = (22.2, 3))
 ball = sensor_right.CreateCircleFixture(radius = 0.2)
 
 world.CreateDistanceJoint(bodyA=sensor_left,bodyB=dynamic_body,collideConnected=True)
@@ -118,25 +118,25 @@ def cross_point_dot(dot1, vec1, dot2, dot3 ):
         return None
 
 def create_wall():
-    wall_bottom = world.CreateKinematicBody(position=(12, 0.5), linearVelocity=(0, 0))
-    box = wall_bottom.CreatePolygonFixture(box=(12, 0.5))
+    wall_bottom = world.CreateKinematicBody(position=(9, 0.5), linearVelocity=(0, 0))
+    box = wall_bottom.CreatePolygonFixture(box=(9, 0.5))
 
-    wall_top = world.CreateKinematicBody(position=(12, 23.5), linearVelocity=(0, 0))
-    box = wall_top.CreatePolygonFixture(box=(12, 0.5))
+    wall_top = world.CreateKinematicBody(position=(15, 23.5), linearVelocity=(0, 0))
+    box = wall_top.CreatePolygonFixture(box=(9, 0.5))
 
     wall_left = world.CreateKinematicBody(position=(0.5, 12), linearVelocity=(0, 0))
-    box = wall_left.CreatePolygonFixture(box=(0.5, 11))
+    box = wall_left.CreatePolygonFixture(box=(0.5, 12))
 
     wall_right = world.CreateKinematicBody(position=(23.5, 12), linearVelocity=(0, 0))
-    box = wall_right.CreatePolygonFixture(box=(0.5, 11))
+    box = wall_right.CreatePolygonFixture(box=(0.5, 12))
 
-    # wall = world.CreateKinematicBody(position=(18, 9.5), linearVelocity=(0, 0))
-    # box = wall.CreatePolygonFixture(box=(0.5, 11.5))
+    wall = world.CreateKinematicBody(position=(18, 9.5), linearVelocity=(0, 0))
+    box = wall.CreatePolygonFixture(box=(0.5, 10))
 
 create_wall()
 
 wall_info = [
-    [(1,1),(23,1)], [(1,1), (1,23)], [(23,1), (23,23)], [(1,23),(23,23)]
+    [(1,1),(17.5,1)], [(1,1), (1,24)], [(23,0), (23,23)], [(1,24),(23,23)], [(18.5,0), (18.5, 19.5)]
 ]
 
 colors = {
@@ -146,7 +146,7 @@ colors = {
 }
 def front_sensor_detect(walls):
     distance = []
-    result = None
+    results = []
     vector = None
     if sensor_left.position[0] == sensor_right.position[0]:
         vector = (1, 0)
@@ -163,11 +163,11 @@ def front_sensor_detect(walls):
     for i in distance:
         if i:
             if i[0] - dynamic_body.position[0] > 0 and vector[0] >0:
-                result = math.sqrt((i[0] - dynamic_body.position[0]) ** 2 + (i[1] - dynamic_body.position[1]) ** 2) - 1.5
+                results.append(math.sqrt((i[0] - dynamic_body.position[0]) ** 2 + (i[1] - dynamic_body.position[1]) ** 2) - 1.5)
                 pygame.draw.line(screen, (255,255,0), (dynamic_body.position[0] *PPM,SCREEN_HEIGHT-dynamic_body.position[1]*PPM),
                                      (i[0]*PPM, SCREEN_HEIGHT-i[1]*PPM), 5)
             elif i[0] - dynamic_body.position[0] < 0 and vector[0] < 0:
-                result = math.sqrt((i[0] - dynamic_body.position[0]) ** 2 + (i[1] - dynamic_body.position[1]) ** 2) - 1.5
+                results.append(math.sqrt((i[0] - dynamic_body.position[0]) ** 2 + (i[1] - dynamic_body.position[1]) ** 2) - 1.5)
                 pygame.draw.line(screen, (255,255,0), (dynamic_body.position[0] *PPM,SCREEN_HEIGHT-dynamic_body.position[1]*PPM),
                                      (i[0]*PPM, SCREEN_HEIGHT-i[1]*PPM), 5)
             else:
@@ -176,13 +176,17 @@ def front_sensor_detect(walls):
             pass
 
     try:
+        if len(results) ==1:
+            result = results[0]
+        else:
+            result = min(results)
         return round(result, 3)
     except TypeError:
-        return result
+        return None
 
 def right_sensor_detect(walls):
     distance = []
-    result = None
+    results = []
     for wall in walls:
         distance.append(cross_point_dot(sensor_right.position,
                         sensor_left.position-sensor_right.position,
@@ -191,11 +195,11 @@ def right_sensor_detect(walls):
     for i in distance:
         if i:
             if sensor_left.position[0] > sensor_right.position[0] >= i[0]:
-                result = math.sqrt((i[0]-sensor_right.position[0])**2 + (i[1]-sensor_right.position[1])**2)
+                results.append(math.sqrt((i[0]-sensor_right.position[0])**2 + (i[1]-sensor_right.position[1])**2))
                 pygame.draw.line(screen, (255,0,255), (sensor_right.position[0] *PPM,SCREEN_HEIGHT-sensor_right.position[1]*PPM),
                                  (i[0]*PPM, SCREEN_HEIGHT-i[1]*PPM), 5)
             elif i[0] >= sensor_right.position[0] >sensor_left.position[0]:
-                result = math.sqrt((i[0]-sensor_right.position[0])**2 + (i[1]-sensor_right.position[1])**2)
+                results.append(math.sqrt((i[0]-sensor_right.position[0])**2 + (i[1]-sensor_right.position[1])**2))
                 pygame.draw.line(screen, (255, 0, 255),
                                  (sensor_right.position[0] * PPM, SCREEN_HEIGHT - sensor_right.position[1] * PPM),
                                  (i[0] * PPM,SCREEN_HEIGHT- i[1] * PPM), 5)
@@ -204,13 +208,17 @@ def right_sensor_detect(walls):
                 pass
 
     try:
-        return round(result, 3)
-    except TypeError:
+        if len(results) == 1:
+            result = results[0]
+        else:
+            result = min(results)
         return result
+    except TypeError:
+        return None
 
 def left_sensor_detect(walls):
     distance = []
-    result = None
+    results = []
     for wall in walls:
         distance.append(cross_point_dot(sensor_left.position,
                         sensor_right.position - sensor_left.position,
@@ -219,21 +227,25 @@ def left_sensor_detect(walls):
     for i in distance:
         if i:
             if sensor_right.position[0] > sensor_left.position[0] >= i[0]:
-                result = math.sqrt((i[0]-sensor_left.position[0])**2 + (i[1]-sensor_left.position[1])**2)
+                results.append(math.sqrt((i[0]-sensor_left.position[0])**2 + (i[1]-sensor_left.position[1])**2))
                 pygame.draw.line(screen, (0, 255, 255),
                                  (sensor_left.position[0] * PPM, SCREEN_HEIGHT - sensor_left.position[1] * PPM),
                                  (i[0] * PPM, SCREEN_HEIGHT- i[1] * PPM), 5)
             elif i[0] >= sensor_left.position[0] >sensor_right.position[0]:
-                result = math.sqrt((i[0]-sensor_left.position[0])**2 + (i[1]-sensor_left.position[1])**2)
+                results.append(math.sqrt((i[0]-sensor_left.position[0])**2 + (i[1]-sensor_left.position[1])**2))
                 pygame.draw.line(screen, (0, 255, 255),
                                  (sensor_left.position[0] * PPM, SCREEN_HEIGHT - sensor_left.position[1] * PPM),
                                  (i[0] * PPM, SCREEN_HEIGHT - i[1] * PPM), 5)
             else:
                 pass
     try:
-        return round(result, 3)
-    except TypeError:
+        if len(results) == 1:
+            result = results[0]
+        else:
+            result = min(results)
         return result
+    except TypeError:
+        return None
 
 # Let's play with extending the shape classes to draw for us.
 
@@ -260,9 +272,9 @@ circleShape.draw = my_draw_circle
 running = True
 while running:
     screen.fill((0, 0, 0, 0))
-    print(front_sensor_detect(wall_info))
-    left_sensor_detect(wall_info)
-    right_sensor_detect(wall_info)
+    # print(front_sensor_detect(wall_info))
+    print(left_sensor_detect(wall_info))
+    # print(right_sensor_detect(wall_info))
 
     # detact distance by using b2Distance
     # Check the event queue
