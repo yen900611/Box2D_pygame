@@ -1,17 +1,7 @@
-'''
-origin code:
-'''
-
 import pygame
-from pygame.locals import *
 import math
-
 import Box2D  # The main library
-# Box2D.b2 maps Box2D.b2Vec2 to vec2 (and so on)
 
-# --- constants ---
-# Box2D deals with meters, but we want to display pixels,
-# so define a conversion factor:
 PPM = 20.0  # pixels per meter
 TARGET_FPS = 60
 TIME_STEP = 1.0 / TARGET_FPS
@@ -116,27 +106,17 @@ def cross_point_dot(dot1, vec1, dot2, dot3 ):
     else:
         return None
 
-def create_wall():
-    wall_bottom = world.CreateKinematicBody(position=(9, 0.5), linearVelocity=(0, 0))
-    box = wall_bottom.CreatePolygonFixture(box=(9, 0.5))
-
-    wall_top = world.CreateKinematicBody(position=(15, 23.5), linearVelocity=(0, 0))
-    box = wall_top.CreatePolygonFixture(box=(9, 0.5))
-
-    wall_left = world.CreateKinematicBody(position=(0.5, 12), linearVelocity=(0, 0))
-    box = wall_left.CreatePolygonFixture(box=(0.5, 12))
-
-    wall_right = world.CreateKinematicBody(position=(23.5, 12), linearVelocity=(0, 0))
-    box = wall_right.CreatePolygonFixture(box=(0.5, 12))
-
-    wall = world.CreateKinematicBody(position=(18, 9.5), linearVelocity=(0, 0))
-    box = wall.CreatePolygonFixture(box=(0.5, 10))
-
-create_wall()
+def create_wall(vertices):
+    wall_bottom = world.CreateKinematicBody(position=(0,0), linearVelocity=(0, 0))
+    box = wall_bottom.CreatePolygonFixture(vertices=vertices)
 
 wall_info = [
-    [(1,1),(17.5,1)], [(1,1), (1,24)], [(23,0), (23,23)], [(1,24),(23,23)], [(18.5,0), (18.5, 19.5)]
+    [(0,0), (18,0), (0,1), (18,1)], [(24,0), (24,24), (23,0), (23,24)]
 ]
+
+for wall in wall_info:
+    create_wall(wall)
+
 
 colors = {
     Box2D.b2.kinematicBody: (255, 255, 255, 255),
@@ -285,32 +265,32 @@ while running:
     # detact distance by using b2Distance
     # Check the event queue
     for event in pygame.event.get():
-        if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+        if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
             # The user closed the window or pressed escape
             running = False
-        if (event.type == KEYDOWN and event.key == K_UP):
+        if (event.type == pygame.KEYDOWN and event.key == pygame.K_UP):
             f = dynamic_body.GetWorldVector(localVector=(0.0, 200.0))
             p = dynamic_body.GetWorldPoint(localPoint=(0.0, -2.0))
             dynamic_body.ApplyForce(f, p, True)
 
-        if (event.type == KEYDOWN and event.key == K_DOWN):
+        if (event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN):
             f = dynamic_body.GetWorldVector(localVector=(0.0, -200.0))
             p = dynamic_body.GetWorldPoint(localPoint=(0.0, -2.0))
             dynamic_body.ApplyForce(f, p, True)
             pass
 
-        if (event.type == KEYDOWN and event.key == K_LEFT):
+        if (event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT):
             dynamic_body.ApplyTorque(100.0, True)
             pass
 
-        if (event.type == KEYDOWN and event.key == K_RIGHT):
+        if (event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT):
             dynamic_body.ApplyTorque(-100.0, True)
             pass
 
-        if (event.type == KEYDOWN and event.key == K_s):
+        if (event.type == pygame.KEYDOWN and event.key == pygame.K_s):
             PPM += 1
 
-        if (event.type == KEYDOWN and event.key == K_w):
+        if (event.type == pygame.KEYDOWN and event.key == pygame.K_w):
             PPM -= 1
 
 

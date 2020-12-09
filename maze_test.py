@@ -88,7 +88,7 @@ world.CreateDistanceJoint(bodyA=sensor_right,bodyB=dynamic_body,collideConnected
 colors = {
     b2.dynamicBody:(127, 127,127), # grey
     b2.staticBody: (255, 255, 255), # white
-    b2.kinematicBody:(100,127,180)
+    b2.kinematicBody:(120,120,230)
 }
 def my_draw_polygon(polygon, body, fixture):
     vertices = [(body.transform * v) * PPM for v in polygon.vertices]
