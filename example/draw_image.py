@@ -117,7 +117,9 @@ while running:
     world.ClearForces()
 
     car = pygame.transform.rotate(car_origin,angle%360)
+    car_rect = car.get_rect()
     car_rect.center = dynamic_body.position[0]* PPM, SCREEN_HEIGHT - dynamic_body.position[1]* PPM
+    # pygame.draw.rect(screen, (255,255,255), car_rect)
     angle = dynamic_body.angle*180/math.pi
     screen.blit(car,car_rect)
 

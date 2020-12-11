@@ -256,7 +256,6 @@ def my_draw_circle(circle, body, fixture):
 
 Box2D.b2.circleShape.draw = my_draw_circle
 
-
 # --- main game loop ---
 
 running = True
