@@ -74,6 +74,7 @@ circleShape.draw = my_draw_circle
 
 # load image
 car_origin = pygame.transform.scale(pygame.image.load("car2.png"),(80,80))
+car_rect = car_origin.get_rect()
 
 angle = dynamic_body.angle*180/math.pi
 
@@ -96,21 +97,13 @@ while running:
             left_wheel_velocity = -10
 
         if (event.type == KEYDOWN and event.key == K_LEFT):
-            right_wheel_velocity = 10
-            left_wheel_velocity = 5
+            dynamic_body.ApplyTorque(1000.0, True)
             pass
 
         if (event.type == KEYDOWN and event.key == K_RIGHT):
-            right_wheel_velocity = 5
-            left_wheel_velocity = 10
+            dynamic_body.ApplyTorque(-1000.0, True)
             pass
 
-        #
-        # if (event.type == KEYDOWN and event.key == K_s):
-        #     left_wheel_velocity = -10
-
-    body2.linearVelocity = (math.sin(dynamic_body.angle) * right_wheel_velocity, math.cos(dynamic_body.angle) * right_wheel_velocity)
-    body1.linearVelocity = (math.sin(dynamic_body.angle) * left_wheel_velocity, math.cos(dynamic_body.angle) * left_wheel_velocity)
 
     screen.fill((0, 0, 0, 0))
     # Draw the world
@@ -124,8 +117,9 @@ while running:
     world.ClearForces()
 
     car = pygame.transform.rotate(car_origin,angle%360)
+    car_rect.center = dynamic_body.position[0]* PPM, SCREEN_HEIGHT - dynamic_body.position[1]* PPM
     angle = dynamic_body.angle*180/math.pi
-    screen.blit(car,((dynamic_body.position[0]-2)*20, (24-dynamic_body.position[1]-2)*20))
+    screen.blit(car,car_rect)
 
 
     # Flip the screen and try to keep at the target FPS

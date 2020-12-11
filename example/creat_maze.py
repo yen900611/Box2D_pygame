@@ -18,11 +18,15 @@ clock = pygame.time.Clock()
 gravity = 0.5
 
 world = Box2D.b2.world(gravity=(0, 0), doSleep=True, CollideConnected=False)
+world2 = Box2D.b2.world(gravity=(0, 0), doSleep=True, CollideConnected=False)
 
 ground = world.CreateBody(position=(0, 20))
 
 dynamic_body = world.CreateDynamicBody(position=(21, 3))
 box1 = dynamic_body.CreatePolygonFixture(box=(1, 1.5), density=2, friction=0.1, restitution=0.3)
+
+dynamic_body2 = world2.CreateDynamicBody(position=(11, 3))
+box1 = dynamic_body2.CreatePolygonFixture(box=(1, 1.5), density=2, friction=0.1, restitution=0.3)
 
 r = math.sqrt(0.2 * dynamic_body.inertia / dynamic_body.mass)
 '''模擬摩擦力'''
@@ -288,18 +292,19 @@ while running:
             pass
 
         if (event.type == pygame.KEYDOWN and event.key == pygame.K_s):
-            PPM += 1
+            dynamic_body2.ApplyForce(dynamic_body2.GetWorldVector(localVector=(0.0, 200.0)), dynamic_body2.position, True)
 
         if (event.type == pygame.KEYDOWN and event.key == pygame.K_w):
-            PPM -= 1
+            dynamic_body2.ApplyForce(dynamic_body2.GetWorldVector(localVector=(0.0, -200.0)), dynamic_body2.position, True)
 
-
-    # screen.fill((0, 0, 0, 0))
     # Draw the world
     for body in world.bodies:
         for fixture in body.fixtures:
             fixture.shape.draw(body, fixture)
 
+    for body in world2.bodies:
+        for fixture in body.fixtures:
+            fixture.shape.draw(body, fixture)
 
     # Make Box2D simulate the physics of our world for one step.
     world.Step(TIME_STEP, 10, 10)
