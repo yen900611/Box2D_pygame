@@ -34,17 +34,17 @@ ground = world.CreateBody(position=(0, 20))
 dynamic_body = world.CreateDynamicBody(position=(21, 3))
 box1 = dynamic_body.CreatePolygonFixture(box=(1, 1.5), density=2, friction=0.1, restitution=0.3)
 
-r = math.sqrt(0.2 * dynamic_body.inertia / dynamic_body.mass)
-'''模擬摩擦力'''
-world.CreateFrictionJoint(
-    bodyA=ground,
-    bodyB=dynamic_body,
-    localAnchorA=(0, 0),
-    localAnchorB=(0, 0),
-    collideConnected=True,
-    maxForce=dynamic_body.mass * gravity,
-    maxTorque=dynamic_body.mass * r * gravity
-)
+# r = math.sqrt(0.2 * dynamic_body.inertia / dynamic_body.mass)
+# '''模擬摩擦力'''
+# world.CreateFrictionJoint(
+#     bodyA=ground,
+#     bodyB=dynamic_body,
+#     localAnchorA=(0, 0),
+#     localAnchorB=(0, 0),
+#     collideConnected=True,
+#     maxForce=dynamic_body.mass * gravity,
+#     maxTorque=dynamic_body.mass * r * gravity
+# )
 
 sensor_left = world.CreateDynamicBody(position = (19.8, 3))
 ball = sensor_left.CreateCircleFixture(radius = 0.2)
@@ -129,8 +129,8 @@ def create_wall():
     wall_right = world.CreateKinematicBody(position=(23.5, 12), linearVelocity=(0, 0))
     box = wall_right.CreatePolygonFixture(box=(0.5, 12))
 
-    wall = world.CreateKinematicBody(position=(18, 9.5), linearVelocity=(0, 0))
-    box = wall.CreatePolygonFixture(box=(0.5, 10))
+    # wall = world.CreateKinematicBody(position=(18, 9.5), linearVelocity=(0, 0))
+    # box = wall.CreatePolygonFixture(box=(0.5, 10))
 
 create_wall()
 
@@ -277,10 +277,13 @@ Box2D.b2.circleShape.draw = my_draw_circle
 
 running = True
 while running:
+    # 改變物體的中心點
+    dynamic_body.localCenter = (1,0)
+
     screen.fill((0, 0, 0, 0))
-    print(front_sensor_detect(wall_info))
-    print(left_sensor_detect(wall_info))
-    print(right_sensor_detect(wall_info))
+    # print(front_sensor_detect(wall_info))
+    # print(left_sensor_detect(wall_info))
+    # print(right_sensor_detect(wall_info))
 
     # detact distance by using b2Distance
     # Check the event queue
@@ -290,28 +293,33 @@ while running:
             running = False
         if (event.type == KEYDOWN and event.key == K_UP):
             f = dynamic_body.GetWorldVector(localVector=(0.0, 100.0))
-            p = dynamic_body.GetWorldPoint(localPoint=(0.0, 2.0))
+            p = dynamic_body.GetWorldPoint(localPoint=(1.0, 0.0))
             dynamic_body.ApplyForce(f, p, True)
 
         if (event.type == KEYDOWN and event.key == K_DOWN):
             f = dynamic_body.GetWorldVector(localVector=(0.0, -100.0))
-            p = dynamic_body.GetWorldPoint(localPoint=(0.0, 2.0))
+            p = dynamic_body.GetWorldPoint(localPoint=(1.0, 0.0))
             dynamic_body.ApplyForce(f, p, True)
             pass
 
-        if (event.type == KEYDOWN and event.key == K_LEFT):
-            dynamic_body.ApplyTorque(100.0, True)
-            pass
-
-        if (event.type == KEYDOWN and event.key == K_RIGHT):
-            dynamic_body.ApplyTorque(-100.0, True)
-            pass
+        # if (event.type == KEYDOWN and event.key == K_LEFT):
+        #     dynamic_body.ApplyTorque(100.0, True)
+        #     pass
+        #
+        # if (event.type == KEYDOWN and event.key == K_RIGHT):
+        #     dynamic_body.ApplyTorque(-100.0, True)
+        #     pass
 
         if (event.type == KEYDOWN and event.key == K_s):
-            PPM += 1
+            f = dynamic_body.GetWorldVector(localVector=(0.0, -100.0))
+            p = dynamic_body.GetWorldPoint(localPoint=(-1.0, 0.0))
+            dynamic_body.ApplyForce(f, p, True)
 
         if (event.type == KEYDOWN and event.key == K_w):
-            PPM -= 1
+            f = dynamic_body.GetWorldVector(localVector=(0.0, 100.0))
+            p = dynamic_body.GetWorldPoint(localPoint=(-1.0, 0.0))
+            dynamic_body.ApplyForce(f, p, True)
+            pass
 
 
     # screen.fill((0, 0, 0, 0))
@@ -324,7 +332,6 @@ while running:
     # Make Box2D simulate the physics of our world for one step.
     world.Step(TIME_STEP, 10, 10)
 
-    # screen.blit(car,((dynamic_body.position[0]-2)*20, (24-dynamic_body.position[1]-2)*20))
 
     # Flip the screen and try to keep at the target FPS
     pygame.display.flip()
