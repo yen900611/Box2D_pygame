@@ -1,11 +1,12 @@
 '''
-try different type of joint # it has not started yet.
+Box2D can set angular velocity on dynamic body.
 '''
+
 import pygame
 import math
 from example.setting import *
-
 import Box2D  # The main library
+# Box2D.b2 maps Box2D.b2Vec2 to vec2 (and so on)
 
 # --- pygame setup ---
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
@@ -22,7 +23,19 @@ world = Box2D.b2.world(gravity=(0, 0), doSleep=True, CollideConnected=False)
 ground = world.CreateBody(position=(0, 20))
 
 dynamic_body = world.CreateDynamicBody(position=(21, 3))
-box1 = dynamic_body.CreatePolygonFixture(box=(1, 1.5), density=2, friction=0.1, restitution=0.3)
+box1 = dynamic_body.CreatePolygonFixture(box=(0.9, 0.9), density=2, friction=0.1, restitution=0.3)
+
+r = math.sqrt(0.2 * dynamic_body.inertia / dynamic_body.mass)
+'''模擬摩擦力'''
+world.CreateFrictionJoint(
+    bodyA=ground,
+    bodyB=dynamic_body,
+    localAnchorA=(0, 0),
+    localAnchorB=(0, 0),
+    collideConnected=True,
+    maxForce=dynamic_body.mass * gravity,
+    maxTorque=dynamic_body.mass * r * gravity
+)
 
 sensor_left = world.CreateDynamicBody(position = (19.8, 3))
 ball = sensor_left.CreateCircleFixture(radius = 0.2)
@@ -51,15 +64,13 @@ def create_wall():
 
 create_wall()
 
-wall_info = [
-    [(1,1),(17.5,1)], [(1,1), (1,24)], [(23,0), (23,23)], [(1,24),(23,23)], [(18.5,0), (18.5, 19.5)]
-]
-
 colors = {
     Box2D.b2.kinematicBody: (255, 255, 255, 255),
     Box2D.b2.staticBody: (255, 255, 255, 255),
     Box2D.b2.dynamicBody: (127, 127, 127, 255),
 }
+
+
 
 # Let's play with extending the shape classes to draw for us.
 
@@ -85,8 +96,13 @@ Box2D.b2.circleShape.draw = my_draw_circle
 
 running = True
 while running:
+    # print(dynamic_body.linearVelocity)
+    # 改變物體的中心點
+    # dynamic_body.localCenter = (1,0)
 
     screen.fill((0, 0, 0, 0))
+
+    # detact distance by using b2Distance
     # Check the event queue
     for event in pygame.event.get():
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
@@ -94,14 +110,21 @@ while running:
             running = False
         if (event.type == pygame.KEYDOWN and event.key == pygame.K_UP):
             f = dynamic_body.GetWorldVector(localVector=(0.0, 100.0))
-            p = dynamic_body.GetWorldPoint(localPoint=(1.0, 0.0))
+            p = dynamic_body.GetWorldPoint(localPoint=(0.0, 0.0))
             dynamic_body.ApplyForce(f, p, False)
 
         if (event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN):
             f = dynamic_body.GetWorldVector(localVector=(0.0, -100.0))
-            p = dynamic_body.GetWorldPoint(localPoint=(1.0, 0.0))
+            p = dynamic_body.GetWorldPoint(localPoint=(0.0, 0.0))
             dynamic_body.ApplyForce(f, p, False)
             pass
+
+        if (event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT):
+            dynamic_body.angularVelocity = 10
+        elif (event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT):
+            dynamic_body.angularVelocity = -10
+        else:
+            dynamic_body.angularVelocity = 0
 
         if (event.type == pygame.KEYDOWN and event.key == pygame.K_s):
             f = dynamic_body.GetWorldVector(localVector=(0.0, -100.0))
@@ -113,6 +136,7 @@ while running:
             p = dynamic_body.GetWorldPoint(localPoint=(-1.0, 0.0))
             dynamic_body.ApplyForce(f, p, False)
             pass
+
 
     screen.fill((0, 0, 0, 0))
     # Draw the world

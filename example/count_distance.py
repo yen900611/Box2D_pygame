@@ -1,5 +1,6 @@
 '''
-origin code:
+Define a function for detecting distance between sensor and walls.
+Since a car has three sensors which work for different direction, I just do three functions at the beginning.
 '''
 
 import pygame
@@ -278,9 +279,9 @@ Box2D.b2.circleShape.draw = my_draw_circle
 running = True
 while running:
     screen.fill((0, 0, 0, 0))
-    print(front_sensor_detect(wall_info))
-    print(left_sensor_detect(wall_info))
-    print(right_sensor_detect(wall_info))
+    print("front sensor", front_sensor_detect(wall_info))
+    print("left sensor", left_sensor_detect(wall_info))
+    print("right sensor", right_sensor_detect(wall_info))
 
     # detact distance by using b2Distance
     # Check the event queue

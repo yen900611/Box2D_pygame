@@ -1,13 +1,6 @@
 import pygame
 from Box2D import b2
-
-# --- constants ---
-# Box2D deals with meters, but we want to display pixels,
-# so define a conversion factor:
-PPM = 20.0  # pixels per meter
-TARGET_FPS = 60
-IME_STEP = 1.0 / TARGET_FPS
-SCREEN_WIDTH, SCREEN_HEIGHT = 900, 480
+from example.setting import *
 
 # --- pygame setup ---
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
