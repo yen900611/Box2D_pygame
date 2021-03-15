@@ -23,6 +23,16 @@ ground = world.CreateBody(position=(0, 20))
 dynamic_body = world.CreateDynamicBody(position=(21, 3))
 box1 = dynamic_body.CreatePolygonFixture(box=(0.9, 0.9), density=2, friction=0.1, restitution=0.3)
 
+
+sensor_left = world.CreateDynamicBody(position = (19.9, 3))
+ball = sensor_left.CreateCircleFixture(radius = 0.2)
+
+sensor_right = world.CreateDynamicBody(position = (22.1, 3))
+ball = sensor_right.CreateCircleFixture(radius = 0.2)
+
+world.CreateDistanceJoint(bodyA=sensor_left,bodyB=dynamic_body,collideConnected=True)
+world.CreateDistanceJoint(bodyA=sensor_right,bodyB=dynamic_body,collideConnected=True)
+
 def create_wall():
     wall_bottom = world.CreateKinematicBody(position=(9, 0.5), linearVelocity=(0, 0))
     box = wall_bottom.CreatePolygonFixture(box=(9, 0.5))
@@ -71,7 +81,6 @@ Box2D.b2.circleShape.draw = my_draw_circle
 
 running = True
 while running:
-
     screen.fill((0, 0, 0, 0))
 
     # detact distance by using b2Distance
@@ -81,18 +90,27 @@ while running:
             # The user closed the window or pressed escape
             running = False
         if (event.type == pygame.KEYDOWN and event.key == pygame.K_UP):
-            dynamic_body.angularVelocity = 2
-            dynamic_body.linearVelocity = dynamic_body.GetWorldVector(localVector = (0,5))
+            sensor_right.linearVelocity = sensor_right.GetWorldVector(localVector = (0,5))
+            sensor_left.linearVelocity = sensor_left.GetWorldVector(localVector = (0,5))
+
+        elif (event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN):
+            sensor_right.linearVelocity = sensor_right.GetWorldVector(localVector = (0,-5))
+            sensor_left.linearVelocity = sensor_left.GetWorldVector(localVector = (0,-5))
+
+        else:
+            sensor_right.linearVelocity = sensor_right.GetWorldVector(localVector = (0,0))
+            sensor_left.linearVelocity = sensor_left.GetWorldVector(localVector = (0,0))
 
         if (event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT):
-            dynamic_body.angularVelocity = 2
+            sensor_right.linearVelocity = sensor_right.GetWorldVector(localVector = (0,5))
 
 
         elif (event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT):
-            dynamic_body.angularVelocity = -2
-
-        else:
-            dynamic_body.angularVelocity = 0.0
+            sensor_left.linearVelocity = sensor_left.GetWorldVector(localVector = (0,5))
+        #
+        # else:
+        #     sensor_right.linearVelocity = sensor_right.GetWorldVector(localVector = (0,0))
+        #     sensor_left.linearVelocity = sensor_left.GetWorldVector(localVector = (0,0))
 
     screen.fill((0, 0, 0, 0))
     # Draw the world

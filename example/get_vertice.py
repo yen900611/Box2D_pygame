@@ -1,12 +1,19 @@
 '''
-Box2D can set angular velocity on dynamic body.
+Define a function for getting vertices(in Box2D) of object.
+If the function work, those vertices can be trnsfer for pygame and draw on screen without Box2D.draw
 '''
 
 import pygame
-import math
 from example.setting import *
 import Box2D  # The main library
-# Box2D.b2 maps Box2D.b2Vec2 to vec2 (and so on)
+
+
+def get_vertice(body, feature):
+    vertices = []
+    for v in feature.shape.vertices:
+        vertices.append(body.transform * v)
+    return vertices
+
 
 # --- pygame setup ---
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
@@ -15,13 +22,10 @@ clock = pygame.time.Clock()
 
 # --- pybox2d world setup ---
 # Create the world
-
+gravity = 0.5
 world = Box2D.b2.world(gravity=(0, 0), doSleep=True, CollideConnected=False)
-
-ground = world.CreateBody(position=(0, 20))
-
 dynamic_body = world.CreateDynamicBody(position=(21, 3))
-box1 = dynamic_body.CreatePolygonFixture(box=(0.9, 0.9), density=2, friction=0.1, restitution=0.3)
+box1 = dynamic_body.CreatePolygonFixture(box=(1, 1.5), density=2, friction=0.1, restitution=0.3)
 
 def create_wall():
     wall_bottom = world.CreateKinematicBody(position=(9, 0.5), linearVelocity=(0, 0))
@@ -36,16 +40,19 @@ def create_wall():
     wall_right = world.CreateKinematicBody(position=(23.5, 12), linearVelocity=(0, 0))
     box = wall_right.CreatePolygonFixture(box=(0.5, 12))
 
-    # wall = world.CreateKinematicBody(position=(18, 9.5), linearVelocity=(0, 0))
-    # box = wall.CreatePolygonFixture(box=(0.5, 10))
+    wall = world.CreateKinematicBody(position=(18, 9.5), linearVelocity=(0, 0))
+    box = wall.CreatePolygonFixture(box=(0.5, 10))
 
 create_wall()
 
 colors = {
-    Box2D.b2.kinematicBody: (255, 255, 255, 255),
-    Box2D.b2.staticBody: (255, 255, 255, 255),
-    Box2D.b2.dynamicBody: (127, 127, 127, 255),
+    Box2D.b2.kinematicBody: WHITE,
+    Box2D.b2.staticBody: WHITE,
+    Box2D.b2.dynamicBody: LIGHT_GREY,
 }
+
+
+
 
 # Let's play with extending the shape classes to draw for us.
 
@@ -71,8 +78,9 @@ Box2D.b2.circleShape.draw = my_draw_circle
 
 running = True
 while running:
-
     screen.fill((0, 0, 0, 0))
+    print(get_vertice(dynamic_body, box1))
+
 
     # detact distance by using b2Distance
     # Check the event queue
@@ -81,20 +89,24 @@ while running:
             # The user closed the window or pressed escape
             running = False
         if (event.type == pygame.KEYDOWN and event.key == pygame.K_UP):
-            dynamic_body.angularVelocity = 2
-            dynamic_body.linearVelocity = dynamic_body.GetWorldVector(localVector = (0,5))
+            f = dynamic_body.GetWorldVector(localVector=(0.0, 100.0))
+            p = dynamic_body.GetWorldPoint(localPoint=(0.0, 2.0))
+            dynamic_body.ApplyForce(f, p, True)
+
+        if (event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN):
+            f = dynamic_body.GetWorldVector(localVector=(0.0, -100.0))
+            p = dynamic_body.GetWorldPoint(localPoint=(0.0, 2.0))
+            dynamic_body.ApplyForce(f, p, True)
+            pass
 
         if (event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT):
-            dynamic_body.angularVelocity = 2
+            dynamic_body.ApplyTorque(100.0, True)
+            pass
+
+        if (event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT):
+            dynamic_body.ApplyTorque(-100.0, True)
 
 
-        elif (event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT):
-            dynamic_body.angularVelocity = -2
-
-        else:
-            dynamic_body.angularVelocity = 0.0
-
-    screen.fill((0, 0, 0, 0))
     # Draw the world
     for body in world.bodies:
         for fixture in body.fixtures:
@@ -104,6 +116,7 @@ while running:
     # Make Box2D simulate the physics of our world for one step.
     world.Step(TIME_STEP, 10, 10)
 
+    # screen.blit(car,((dynamic_body.position[0]-2)*20, (24-dynamic_body.position[1]-2)*20))
 
     # Flip the screen and try to keep at the target FPS
     pygame.display.flip()
